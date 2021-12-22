@@ -1,6 +1,6 @@
 from micropython import const
 
-from trezor import ui
+from trezor import ui, wire
 from trezor.messages import AuthorizeCoinJoin, Success
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_action, confirm_coinjoin
@@ -14,11 +14,10 @@ from .keychain import validate_path_against_script_type, with_keychain
 from .sign_tx.layout import format_coin_amount
 
 if False:
-    from trezor import wire
     from apps.common.coininfo import CoinInfo
     from apps.common.keychain import Keychain
 
-_MAX_COORDINATOR_LEN = const(18)
+_MAX_COORDINATOR_LEN = const(36)
 
 
 @with_keychain
