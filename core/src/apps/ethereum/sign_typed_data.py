@@ -71,32 +71,46 @@ async def generate_typed_data_hash(
     )
     await typed_data_envelope.collect_types()
 
+    # EIP-712 prefix
+    parts = [b"\x19\x01"]
+
     name, version = await get_name_and_version_for_domain(ctx, typed_data_envelope)
     show_domain = await should_show_domain(ctx, name, version)
-    domain_separator = await typed_data_envelope.hash_struct(
-        primary_type="EIP712Domain",
-        member_path=[0],
-        show_data=show_domain,
-        parent_objects=["EIP712Domain"],
+    # domain_seperator
+    parts.append(
+        await typed_data_envelope.hash_struct(
+            primary_type="EIP712Domain",
+            member_path=[0],
+            show_data=show_domain,
+            parent_objects=["EIP712Domain"],
+        )
     )
 
-    show_message = await should_show_struct(
-        ctx,
-        description=primary_type,
-        data_members=typed_data_envelope.types[primary_type].members,
-        title="Confirm message",
-        button_text="Show full message",
-    )
-    message_hash = await typed_data_envelope.hash_struct(
-        primary_type=primary_type,
-        member_path=[1],
-        show_data=show_message,
-        parent_objects=[primary_type],
-    )
+    # Setting the primary_type to "EIP712Domain" is technically in spec
+    # In this case, we ignore the "message" part and only use the "domain" part
+    # https://ethereum-magicians.org/t/eip-712-standards-clarification-primarytype-as-domaintype/3286
+    if primary_type != "EIP712Domain":
+        show_message = await should_show_struct(
+            ctx,
+            description=primary_type,
+            data_members=typed_data_envelope.types[primary_type].members,
+            title="Confirm message",
+            button_text="Show full message",
+        )
+        parts.append(
+            await typed_data_envelope.hash_struct(
+                primary_type=primary_type,
+                member_path=[1],
+                show_data=show_message,
+                parent_objects=[primary_type],
+            )
+        )
 
-    await confirm_hash(ctx, message_hash)
+    full_bytes_to_hash = b"".join(parts)
 
-    return keccak256(b"\x19" + b"\x01" + domain_separator + message_hash)
+    await confirm_hash(ctx, full_bytes_to_hash)
+
+    return keccak256(full_bytes_to_hash)
 
 
 def get_hash_writer() -> HashWriter:

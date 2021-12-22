@@ -5,6 +5,28 @@
     },
     "tests": [
         {
+            "name": "domain_only_message",
+            "comment": "Bare minimum EIP-712 message",
+            "parameters": {
+                "path": "m/44'/60'/0'/0/0",
+                "metamask_v4_compat": true,
+                "data": {
+                    "types": {
+                        "EIP712Domain": []
+                    },
+                    "primaryType": "EIP712Domain",
+                    "message": {},
+                    "domain": {}
+                },
+                "message_hash": "0x",
+                "domain_separator_hash": "0x6192106f129ce05c9075d319c1fa6ea9b3ae37cbd0c1ef92e2be7137bb07baa1"
+            },
+            "result": {
+                "address": "0x73d0385F4d8E00C5e6504C6030F47BF6212736A8",
+                "sig": "0x18aaea9abed7cd88d3763a9a420e2e7b71a9f991685fbc62d74da86326cffa680644862d459d1973e422777a3933bc74190b1cae9a5418ddaea645a7d7630dd91c"
+            }
+        },
+        {
             "name": "basic_data",
             "parameters": {
                 "path": "m/44'/60'/0'/0/0",

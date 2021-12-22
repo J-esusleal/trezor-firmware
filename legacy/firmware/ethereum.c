@@ -987,12 +987,27 @@ static void ethereum_typed_hash(const uint8_t domain_separator_hash[32],
   keccak_Final(&ctx, hash);
 }
 
+// When primaryType="EIP712Domain", we ignore message_hash completely
+static void ethereum_domain_only_typed_hash(
+    const uint8_t domain_separator_hash[32], uint8_t hash[32]) {
+  struct SHA3_CTX ctx = {0};
+  sha3_256_Init(&ctx);
+  sha3_Update(&ctx, (const uint8_t *)"\x19\x01", 2);
+  sha3_Update(&ctx, domain_separator_hash, 32);
+  keccak_Final(&ctx, hash);
+}
+
 void ethereum_typed_hash_sign(const EthereumSignTypedHash *msg,
                               const HDNode *node,
                               EthereumTypedDataSignature *resp) {
   uint8_t hash[32] = {0};
-  ethereum_typed_hash(msg->domain_separator_hash.bytes, msg->message_hash.bytes,
-                      hash);
+
+  if (msg->message_hash.size) {
+    ethereum_typed_hash(msg->domain_separator_hash.bytes,
+                        msg->message_hash.bytes, hash);
+  } else {
+    ethereum_domain_only_typed_hash(msg->domain_separator_hash.bytes, hash);
+  }
 
   uint8_t v = 0;
   if (ecdsa_sign_digest(&secp256k1, node->private_key, hash,
