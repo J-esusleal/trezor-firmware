@@ -18,7 +18,7 @@
                     "message": {},
                     "domain": {}
                 },
-                "message_hash": "0x",
+                "message_hash": null,
                 "domain_separator_hash": "0x6192106f129ce05c9075d319c1fa6ea9b3ae37cbd0c1ef92e2be7137bb07baa1"
             },
             "result": {
@@ -67,7 +67,7 @@
                         "salt": "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
                     }
                 },
-                "message_hash": "0x",
+                "message_hash": null,
                 "domain_separator_hash": "0xf85aaf157e9a36dc6e12643fff450fdf8d98fd0d0e41c5b42bb1f7aae6c83388"
             },
             "result": {

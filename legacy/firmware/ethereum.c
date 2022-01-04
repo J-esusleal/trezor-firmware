@@ -976,24 +976,20 @@ int ethereum_message_verify(const EthereumVerifyMessage *msg) {
   return 0;
 }
 
+/*
+ * EIP-712 hashes might have no message_hash if primaryType="EIP712Domain".
+ * In this case, set domain_only_hash=true.
+ */
 static void ethereum_typed_hash(const uint8_t domain_separator_hash[32],
                                 const uint8_t message_hash[32],
-                                uint8_t hash[32]) {
+                                bool domain_only_hash, uint8_t hash[32]) {
   struct SHA3_CTX ctx = {0};
   sha3_256_Init(&ctx);
   sha3_Update(&ctx, (const uint8_t *)"\x19\x01", 2);
   sha3_Update(&ctx, domain_separator_hash, 32);
-  sha3_Update(&ctx, message_hash, 32);
-  keccak_Final(&ctx, hash);
-}
-
-// When primaryType="EIP712Domain", we ignore message_hash completely
-static void ethereum_domain_only_typed_hash(
-    const uint8_t domain_separator_hash[32], uint8_t hash[32]) {
-  struct SHA3_CTX ctx = {0};
-  sha3_256_Init(&ctx);
-  sha3_Update(&ctx, (const uint8_t *)"\x19\x01", 2);
-  sha3_Update(&ctx, domain_separator_hash, 32);
+  if (!domain_only_hash) {
+    sha3_Update(&ctx, message_hash, 32);
+  }
   keccak_Final(&ctx, hash);
 }
 
@@ -1002,11 +998,11 @@ void ethereum_typed_hash_sign(const EthereumSignTypedHash *msg,
                               EthereumTypedDataSignature *resp) {
   uint8_t hash[32] = {0};
 
-  if (msg->message_hash.size) {
+  if (msg->has_message_hash) {
     ethereum_typed_hash(msg->domain_separator_hash.bytes,
-                        msg->message_hash.bytes, hash);
+                        msg->message_hash.bytes, false, hash);
   } else {
-    ethereum_domain_only_typed_hash(msg->domain_separator_hash.bytes, hash);
+    ethereum_typed_hash(msg->domain_separator_hash.bytes, NULL, true, hash);
   }
 
   uint8_t v = 0;
