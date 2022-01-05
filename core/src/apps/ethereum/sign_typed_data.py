@@ -20,6 +20,7 @@ from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 from .layout import (
     confirm_hash,
     confirm_typed_value,
+    require_confirm_empty_typed_message,
     should_show_array,
     should_show_domain,
     should_show_struct,
@@ -84,6 +85,7 @@ async def generate_typed_data_hash(
     # In this case, we ignore the "message" part and only use the "domain" part
     # https://ethereum-magicians.org/t/eip-712-standards-clarification-primarytype-as-domaintype/3286
     if primary_type == "EIP712Domain":
+        await require_confirm_empty_typed_message(ctx)
         message_hash = b""
     else:
         show_message = await should_show_struct(

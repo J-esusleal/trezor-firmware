@@ -119,6 +119,16 @@ async def confirm_hash(ctx: Context, message_hash: bytes) -> None:
     )
 
 
+def require_confirm_empty_typed_message(ctx: Context) -> Awaitable[None]:
+    return confirm_text(
+        ctx,
+        "confirm_empty_typed_message",
+        title="Confirm message",
+        data="",
+        description="No message field",
+    )
+
+
 async def should_show_domain(ctx: Context, name: bytes, version: bytes) -> bool:
     domain_name = decode_typed_data(name, "string")
     domain_version = decode_typed_data(version, "string")
